@@ -41,14 +41,14 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
       import Events.wordCountToTimeBlocks
       it("converts a word count to a list of pomodoro blocks with word counts") {
         implicit val pomoOpts = PomodoroOptions(pacePerPomodoro = 100)
-        wordCountToTimeBlocks(50) should equal (Seq((0, 1, 50)))
-        wordCountToTimeBlocks(100) should equal (Seq((0, 1, 100)))
-        wordCountToTimeBlocks(200) should equal (Seq((0, 2, 200)))
-        wordCountToTimeBlocks(300) should equal (Seq((0, 3, 300)))
-        wordCountToTimeBlocks(350) should equal (Seq((0, 3, 300), (4, 5, 50)))
-        wordCountToTimeBlocks(400) should equal (Seq((0, 3, 300), (4, 5, 100)))
-        wordCountToTimeBlocks(600) should equal (Seq((0, 3, 300), (4, 7, 300)))
-        wordCountToTimeBlocks(700) should equal (Seq((0, 3, 300), (4, 7, 300), (8, 9, 100)))
+        wordCountToTimeBlocks(50) should equal (Seq(TimeBlock(0, 1, 50)))
+        wordCountToTimeBlocks(100) should equal (Seq(TimeBlock(0, 1, 100)))
+        wordCountToTimeBlocks(200) should equal (Seq(TimeBlock(0, 2, 200)))
+        wordCountToTimeBlocks(300) should equal (Seq(TimeBlock(0, 3, 300)))
+        wordCountToTimeBlocks(350) should equal (Seq(TimeBlock(0, 3, 300), TimeBlock(4, 5, 50)))
+        wordCountToTimeBlocks(400) should equal (Seq(TimeBlock(0, 3, 300), TimeBlock(4, 5, 100)))
+        wordCountToTimeBlocks(600) should equal (Seq(TimeBlock(0, 3, 300), TimeBlock(4, 7, 300)))
+        wordCountToTimeBlocks(700) should equal (Seq(TimeBlock(0, 3, 300), TimeBlock(4, 7, 300), TimeBlock(8, 9, 100)))
       }
     }
 

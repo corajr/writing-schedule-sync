@@ -16,11 +16,12 @@ case class IcsEvent(date: java.time.LocalDate, wordCount: Int) extends Event {
 
 case class GcalEvent(start: DateTime, end: DateTime, summary: String) extends Event
 
-
 case class PomodoroOptions(
   pacePerPomodoro: Int = 125,
   startTime: LocalTime = LocalTime.of(13, 0)
 )
+
+case class TimeBlock(startOffset: Int, endOffset: Int, wordCount: Int)
 
 object Events {
   import scala.language.implicitConversions
@@ -39,15 +40,15 @@ object Events {
   implicit def dateToLocalDate(date: java.util.Date): LocalDate =
     date.toInstant().atZone(ZoneId.of("UTC")).toLocalDate()
 
-  def wordCountToTimeBlocks(wordCount: Int)(implicit pomoOpts: PomodoroOptions): Seq[(Int, Int, Int)] = {
-    def wordCountToTimeBlocks0(n: Int, i: Int, count: Int): Seq[(Int, Int, Int)] = {
+  def wordCountToTimeBlocks(wordCount: Int)(implicit pomoOpts: PomodoroOptions): Seq[TimeBlock] = {
+    def wordCountToTimeBlocks0(n: Int, i: Int, count: Int): Seq[TimeBlock] = {
       if (i == 0) {
         Seq()
       } else if (i < 3) {
-        Seq((n, n+i, count))
+        Seq(TimeBlock(n, n+i, count))
       } else {
         val wc = pomoOpts.pacePerPomodoro * 3
-        Seq((n, n+3, pomoOpts.pacePerPomodoro * 3)) ++ wordCountToTimeBlocks0(n + 4, i - 3, count - wc)
+        Seq(TimeBlock(n, n+3, pomoOpts.pacePerPomodoro * 3)) ++ wordCountToTimeBlocks0(n + 4, i - 3, count - wc)
       }
     }
 
