@@ -1,6 +1,6 @@
 import org.scalatest._
 
-@Ignore
+// @Ignore
 class WebSpec extends FunSpec with Matchers {
   describe("getTitle") {
     it("gets the title of a page") {
@@ -8,7 +8,7 @@ class WebSpec extends FunSpec with Matchers {
     }
   }
   describe("extractCalendar") {
-    it("extracts an iCal object from a pacemaker URL") {
+    it("extracts a sequences of events from a pacemaker URL") {
       val plan = Web.extractCalendar("https://pacemaker.press/users/corajr/plans/example")
       plan should be (true)
     }

@@ -81,4 +81,16 @@ object Events {
       wc = vevent.getSummary
     } yield IcsEvent(date, wc)
   }
+
+  def toGcal(events: Seq[IcsEvent])(implicit pomoOpts: PomodoroOptions = PomodoroOptions()): Seq[GcalEvent] =
+    events.flatMap(_.toGcal)
+
+  def fromFileToGcal(file: java.io.File)(implicit pomoOpts: PomodoroOptions = PomodoroOptions()): Seq[GcalEvent] = {
+    val fis = new java.io.FileInputStream(file)
+    try {
+      toGcal(fromInputStream(fis))
+    } finally {
+      fis.close()
+    }
+  }
 }

@@ -27,6 +27,7 @@ object Web extends WebBrowser {
     click on id("exportCalLink")
 
     val calFile = new java.io.File("./download_cache/PacemakerWritingSchedule.ics")
-    calFile.exists
+
+    waitFor({_ => calFile.exists})
   }
 }

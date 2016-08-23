@@ -84,13 +84,22 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
           LocalDate.of(2016, 8, 22),
           LocalDate.of(2016, 8, 23),
           LocalDate.of(2016, 8, 24),
-          LocalDate.of(2016, 8, 25)
+          LocalDate.of(2016, 8, 25),
+          LocalDate.of(2016, 8, 26)
         )
         val expectedEvents = dates.map { d => IcsEvent(d, 2000) }
 
         forAll (events zip expectedEvents) { case (x, y) =>
           x should equal (y)
         }
+      }
+    }
+
+    describe("fromFileToGcal") {
+      it("turns an input iCal into GcalEvents") {
+        val ics = new java.io.File(getClass.getResource("/PacemakerWritingSchedule.ics").getFile)
+        val events = Events.fromFileToGcal(ics)
+        events should have size (30)
       }
     }
   }
