@@ -8,25 +8,28 @@ import net.fortuna.ical4j.model.component._
 import net.fortuna.ical4j.model.property._
 import net.fortuna.ical4j.util.CompatibilityHints
 
-sealed trait Event
-
-case class IcsEvent(date: java.time.LocalDate, wordCount: Int) extends Event {
+case class IcsEvent(date: java.time.LocalDate, wordCount: Int) {
   import scala.language.postfixOps
 
   def toGcal(implicit pomoOpts: PomodoroOptions): Seq[GcalEvent] = {
     val timeBlocks = Events.wordCountToTimeBlocks(wordCount)
-    val startTime = LocalDateTime.of(date, pomoOpts.startTime)
-    val halfHours: Seq[DateTime] =
-      Seq.iterate(startTime, timeBlocks.last.endOffset + 1) { x => x.plus(30 minutes) }
-        .map(Events.localDateTimeToDateTime)
 
-    timeBlocks.map { case TimeBlock(i, j, count) =>
-      GcalEvent(halfHours(i), halfHours(j), s"$count words")
+    if (timeBlocks.nonEmpty) {
+      val startTime = LocalDateTime.of(date, pomoOpts.startTime)
+      val halfHours: Seq[DateTime] =
+        Seq.iterate(startTime, timeBlocks.last.endOffset + 1) { x => x.plus(30 minutes) }
+          .map(Events.localDateTimeToDateTime)
+
+      timeBlocks.map { case TimeBlock(i, j, count) =>
+        GcalEvent(halfHours(i), halfHours(j), s"$count words")
+      }
+    } else {
+      Seq()
     }
   }
 }
 
-case class GcalEvent(start: DateTime, end: DateTime, summary: String) extends Event
+case class GcalEvent(start: DateTime, end: DateTime, summary: String)
 
 case class PomodoroOptions(
   pacePerPomodoro: Int = 125,

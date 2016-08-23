@@ -1,6 +1,6 @@
 import org.scalatest._
 
-// @Ignore
+@Ignore
 class WebSpec extends FunSpec with Matchers {
   describe("getTitle") {
     it("gets the title of a page") {

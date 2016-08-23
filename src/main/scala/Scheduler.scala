@@ -1,3 +1,4 @@
+import com.google.api.services.calendar.model._
 import com.google.api.client.util.DateTime
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback
 import com.google.api.client.googleapis.json.GoogleJsonError
@@ -12,6 +13,16 @@ object Scheduler extends App {
 
   lazy val deleteCallback = new JsonBatchCallback[Void]() {
     override def onSuccess(content: Void, responseHeaders: HttpHeaders): Unit = {
+    }
+
+    override def onFailure(e: GoogleJsonError, responseHeaders: HttpHeaders): Unit = {
+      println(s"Error: ${e.getMessage}")
+    }
+  }
+
+  lazy val eventCallback = new JsonBatchCallback[Event]() {
+    override def onSuccess(event: Event, responseHeaders: HttpHeaders): Unit = {
+      println(s"Added ${event}")
     }
 
     override def onFailure(e: GoogleJsonError, responseHeaders: HttpHeaders): Unit = {
@@ -41,7 +52,29 @@ object Scheduler extends App {
     batch.execute()
   }
 
-  def addEvents(): Unit = {
+  def addEvents(events: Seq[GcalEvent]): Unit = {
     val batch = service.batch()
+
+    for (GcalEvent(start, end, summary) <- events) {
+      val event = new Event()
+      event.setSummary(summary)
+      event.setStart(new EventDateTime().setDateTime(start))
+      event.setEnd(new EventDateTime().setDateTime(end))
+      service.events().insert(calendarId, event).queue(batch, eventCallback)
+    }
+
+    batch.execute()
   }
+
+  args match {
+    case Array(fname) =>
+      val file = new java.io.File(fname)
+      val events = Events.fromFileToGcal(file)
+      if (events.nonEmpty) {
+        deleteExistingEvents()
+        addEvents(events)
+      }
+    case _ => println("Needs an ICS filename.")
+  }
+
 }
