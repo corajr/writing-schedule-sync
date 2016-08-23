@@ -28,26 +28,53 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
       event.summary should be ("500 Words")
     }
   }
+  describe("PomodoroOptions") {
+    it("has a pace and a start time") {
+      val pomoOpts = PomodoroOptions()
+      pomoOpts.pacePerPomodoro should equal (125)
+      pomoOpts.startTime should equal (LocalTime.of(13,0))
+    }
+  }
 
   describe("Events") {
-    it("parses a summary into an int") {
-      val summary = new Summary("500 Words")
-      Events.summaryToWordCount(summary) should be (500)
+    describe("wordCountToTimeBlocks") {
+      import Events.wordCountToTimeBlocks
+      it("converts a word count to a list of pomodoro blocks with word counts") {
+        implicit val pomoOpts = PomodoroOptions(pacePerPomodoro = 100)
+        wordCountToTimeBlocks(50) should equal (Seq((0, 1, 50)))
+        wordCountToTimeBlocks(100) should equal (Seq((0, 1, 100)))
+        wordCountToTimeBlocks(200) should equal (Seq((0, 2, 200)))
+        wordCountToTimeBlocks(300) should equal (Seq((0, 3, 300)))
+        wordCountToTimeBlocks(350) should equal (Seq((0, 3, 300), (4, 5, 50)))
+        wordCountToTimeBlocks(400) should equal (Seq((0, 3, 300), (4, 5, 100)))
+        wordCountToTimeBlocks(600) should equal (Seq((0, 3, 300), (4, 7, 300)))
+        wordCountToTimeBlocks(700) should equal (Seq((0, 3, 300), (4, 7, 300), (8, 9, 100)))
+      }
     }
-    it("parses an input iCal into IcsEvents") {
-      val stream = getClass.getResourceAsStream("/PacemakerWritingSchedule.ics")
-      val events = Events.fromInputStream(stream)
 
-      val dates: Seq[LocalDate] = Seq(
-        LocalDate.of(2016, 8, 22),
-        LocalDate.of(2016, 8, 23),
-        LocalDate.of(2016, 8, 24),
-        LocalDate.of(2016, 8, 25)
-      )
-      val expectedEvents = dates.map { d => IcsEvent(d, 2000) }
+    describe("summaryToWordCount") {
+      it("parses a summary into an int") {
+        val summary = new Summary("500 Words")
+        Events.summaryToWordCount(summary) should be (500)
+      }
+    }
 
-      forAll (events zip expectedEvents) { case (x, y) =>
-        x should equal (y)
+    describe("fromInputStream") {
+      it("parses an input iCal into IcsEvents") {
+        val stream = getClass.getResourceAsStream("/PacemakerWritingSchedule.ics")
+        val events = Events.fromInputStream(stream)
+
+        val dates: Seq[LocalDate] = Seq(
+          LocalDate.of(2016, 8, 22),
+          LocalDate.of(2016, 8, 23),
+          LocalDate.of(2016, 8, 24),
+          LocalDate.of(2016, 8, 25)
+        )
+        val expectedEvents = dates.map { d => IcsEvent(d, 2000) }
+
+        forAll (events zip expectedEvents) { case (x, y) =>
+          x should equal (y)
+        }
       }
     }
   }
