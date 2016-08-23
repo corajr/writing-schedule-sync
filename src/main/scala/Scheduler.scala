@@ -7,10 +7,10 @@ object Scheduler extends App {
   import scala.collection.JavaConversions.asScalaBuffer
   import CalendarQuickstart.{getCalendarService}
 
-  val service: com.google.api.services.calendar.Calendar =
+  lazy val service: com.google.api.services.calendar.Calendar =
     getCalendarService()
 
-  val deleteCallback = new JsonBatchCallback[Void]() {
+  lazy val deleteCallback = new JsonBatchCallback[Void]() {
     override def onSuccess(content: Void, responseHeaders: HttpHeaders): Unit = {
     }
 
@@ -19,25 +19,29 @@ object Scheduler extends App {
     }
   }
 
-  val now = new DateTime(System.currentTimeMillis())
-
   val calendarId = sys.env.getOrElse("GCAL_CALENDAR_ID", { throw new IllegalStateException("Must have a calendar ID set")})
 
-  val events = service.events().list(calendarId)
-    // .setMaxResults(10)
-    .setTimeMin(now)
-    .setOrderBy("startTime")
-    .setSingleEvents(true)
-    .execute()
+  def deleteExistingEvents(): Unit = {
+    val now = new DateTime(System.currentTimeMillis())
+    val events = service.events().list(calendarId)
+      .setTimeMin(now)
+      .setOrderBy("startTime")
+      .setSingleEvents(true)
+      .execute()
 
-  val batch = service.batch()
+    val batch = service.batch()
 
-  for (
-    event <- events.getItems;
-    evtId = event.getId
-  ) {
-    service.events().delete(calendarId, evtId).queue(batch, deleteCallback)
+    for (
+      event <- events.getItems;
+      evtId = event.getId
+    ) {
+      service.events().delete(calendarId, evtId).queue(batch, deleteCallback)
+    }
+
+    batch.execute()
   }
 
-  batch.execute()
+  def addEvents(): Unit = {
+    val batch = service.batch()
+  }
 }
