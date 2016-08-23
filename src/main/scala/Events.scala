@@ -24,9 +24,9 @@ object Events {
   val summaryRegex = "\\d+(?= words)".r
 
   implicit def summaryToWordCount(summary: Summary): Int = {
-    summary.getValue match {
-      case summaryRegex(n) => n.toInt
-      case _ => 0
+    summaryRegex.findFirstIn(summary.getValue) match {
+      case Some(n) => n.toInt
+      case None => 0
     }
   }
 
