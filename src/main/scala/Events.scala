@@ -21,7 +21,7 @@ object Events {
   import scala.collection.JavaConversions.asScalaBuffer
   CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true)
 
-  val summaryRegex = "\\d+(?= words)".r
+  val summaryRegex = "\\d+(?= Words)".r
 
   implicit def summaryToWordCount(summary: Summary): Int = {
     summaryRegex.findFirstIn(summary.getValue) match {

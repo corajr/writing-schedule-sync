@@ -3,7 +3,7 @@ import java.time._
 import net.fortuna.ical4j.model.property.Summary
 import com.google.api.client.util.DateTime
 
-class EventSpec extends FunSpec with Matchers {
+class EventSpec extends FunSpec with Matchers with Inspectors {
   describe("IcsEvent") {
     val date = LocalDate.now()
     val sample = IcsEvent(date, 500)
@@ -21,17 +21,17 @@ class EventSpec extends FunSpec with Matchers {
     it("has a start, end, and summary") {
       val date = new java.util.Date()
       val d = new DateTime(date)
-      val event = GcalEvent(d, d, "500 words")
+      val event = GcalEvent(d, d, "500 Words")
 
       event.start should be (d)
       event.end should be (d)
-      event.summary should be ("500 words")
+      event.summary should be ("500 Words")
     }
   }
 
   describe("Events") {
     it("parses a summary into an int") {
-      val summary = new Summary("500 words")
+      val summary = new Summary("500 Words")
       Events.summaryToWordCount(summary) should be (500)
     }
     it("parses an input iCal into IcsEvents") {
@@ -46,8 +46,9 @@ class EventSpec extends FunSpec with Matchers {
       )
       val expectedEvents = dates.map { d => IcsEvent(d, 2000) }
 
-      println(events)
-      events should be (expectedEvents)
+      forAll (events zip expectedEvents) { case (x, y) =>
+        x should equal (y)
+      }
     }
   }
 }
