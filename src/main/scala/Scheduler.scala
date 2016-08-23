@@ -1,3 +1,4 @@
+import java.time._
 import com.google.api.services.calendar.model._
 import com.google.api.client.util.DateTime
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback
@@ -32,10 +33,13 @@ object Scheduler extends App {
 
   val calendarId = sys.env.getOrElse("GCAL_CALENDAR_ID", { throw new IllegalStateException("Must have a calendar ID set")})
 
+  val startOfDay = new DateTime(
+    LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
+  )
+
   def deleteExistingEvents(): Unit = {
-    val now = new DateTime(System.currentTimeMillis())
     val events = service.events().list(calendarId)
-      .setTimeMin(now)
+      .setTimeMin(startOfDay)
       .setOrderBy("startTime")
       .setSingleEvents(true)
       .execute()
@@ -55,7 +59,10 @@ object Scheduler extends App {
   def addEvents(events: Seq[GcalEvent]): Unit = {
     val batch = service.batch()
 
-    for (GcalEvent(start, end, summary) <- events) {
+    for (
+      GcalEvent(start, end, summary) <- events
+      if start.getValue() >= startOfDay.getValue()
+    ) {
       val event = new Event()
       event.setSummary(summary)
       event.setStart(new EventDateTime().setDateTime(start))
