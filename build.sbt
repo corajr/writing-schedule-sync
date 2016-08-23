@@ -9,6 +9,7 @@ libraryDependencies ++= Seq(
   "com.google.oauth-client" % "google-oauth-client-jetty" % "1.22.0",
   "com.google.apis" % "google-api-services-calendar" % "v3-rev208-1.22.0",
   "org.mnode.ical4j" % "ical4j" % "2.0-beta1",
+  "codes.reactive" %% "scala-time" % "0.4.0",
   "org.seleniumhq.selenium" % "selenium-java" % "3.0.0-beta2",
   "com.machinepublishers" % "jbrowserdriver" % "0.16.4",
   "org.scalatest" %% "scalatest" % "3.0.0"
