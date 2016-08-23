@@ -11,7 +11,19 @@ import net.fortuna.ical4j.util.CompatibilityHints
 sealed trait Event
 
 case class IcsEvent(date: java.time.LocalDate, wordCount: Int) extends Event {
-  def toGcal: Seq[GcalEvent] = Seq()
+  import scala.language.postfixOps
+
+  def toGcal(implicit pomoOpts: PomodoroOptions): Seq[GcalEvent] = {
+    val timeBlocks = Events.wordCountToTimeBlocks(wordCount)
+    val startTime = LocalDateTime.of(date, pomoOpts.startTime)
+    val halfHours: Seq[DateTime] =
+      Seq.iterate(startTime, timeBlocks.last.endOffset + 1) { x => x.plus(30 minutes) }
+        .map(Events.localDateTimeToDateTime)
+
+    timeBlocks.map { case TimeBlock(i, j, count) =>
+      GcalEvent(halfHours(i), halfHours(j), s"$count words")
+    }
+  }
 }
 
 case class GcalEvent(start: DateTime, end: DateTime, summary: String) extends Event
@@ -40,15 +52,18 @@ object Events {
   implicit def dateToLocalDate(date: java.util.Date): LocalDate =
     date.toInstant().atZone(ZoneId.of("UTC")).toLocalDate()
 
+  implicit def localDateTimeToDateTime(ldt: LocalDateTime): DateTime =
+    new DateTime(java.util.Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()))
+
   def wordCountToTimeBlocks(wordCount: Int)(implicit pomoOpts: PomodoroOptions): Seq[TimeBlock] = {
-    def wordCountToTimeBlocks0(n: Int, i: Int, count: Int): Seq[TimeBlock] = {
+    def wordCountToTimeBlocks0(n: Int, i: Int, count: Int): List[TimeBlock] = {
       if (i == 0) {
-        Seq()
+        List()
       } else if (i < 3) {
-        Seq(TimeBlock(n, n+i, count))
+        List(TimeBlock(n, n+i, count))
       } else {
         val wc = pomoOpts.pacePerPomodoro * 3
-        Seq(TimeBlock(n, n+3, pomoOpts.pacePerPomodoro * 3)) ++ wordCountToTimeBlocks0(n + 4, i - 3, count - wc)
+        TimeBlock(n, n+3, wc) :: wordCountToTimeBlocks0(n + 4, i - 3, count - wc)
       }
     }
 

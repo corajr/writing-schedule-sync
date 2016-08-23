@@ -14,7 +14,23 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
     }
 
     it("can be converted into a series of GcalEvents") {
-      sample.toGcal should be (Seq())
+      implicit val pomoOpts = PomodoroOptions()
+
+      val dateTimes = IndexedSeq(
+        LocalDateTime.of(date, LocalTime.of(13, 0)),
+        LocalDateTime.of(date, LocalTime.of(14, 30)),
+        LocalDateTime.of(date, LocalTime.of(15, 0)),
+        LocalDateTime.of(date, LocalTime.of(15, 30))
+      ).map(Events.localDateTimeToDateTime)
+
+      val expectedEvents = Seq(
+        GcalEvent(dateTimes(0), dateTimes(1), "375 words"),
+        GcalEvent(dateTimes(2), dateTimes(3), "125 words")
+      )
+
+      forAll(sample.toGcal zip expectedEvents) { case (x, y) =>
+        x should equal (y)
+      }
     }
   }
   describe("GcalEvent") {
