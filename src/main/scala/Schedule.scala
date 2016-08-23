@@ -1,4 +1,7 @@
 import com.google.api.client.util.DateTime
+import com.google.api.client.googleapis.batch.json.JsonBatchCallback
+import com.google.api.client.googleapis.json.GoogleJsonError
+import com.google.api.client.http.HttpHeaders
 
 object Scheduler extends App {
   import scala.collection.JavaConversions.asScalaBuffer
@@ -7,24 +10,34 @@ object Scheduler extends App {
   val service: com.google.api.services.calendar.Calendar =
     getCalendarService()
 
+  val deleteCallback = new JsonBatchCallback[Void]() {
+    override def onSuccess(content: Void, responseHeaders: HttpHeaders): Unit = {
+    }
+
+    override def onFailure(e: GoogleJsonError, responseHeaders: HttpHeaders): Unit = {
+      println(s"Error: ${e.getMessage}")
+    }
+  }
+
   val now = new DateTime(System.currentTimeMillis())
-  val events = service.events().list("primary")
-    .setMaxResults(10)
+
+  val calendarId = sys.env.getOrElse("GCAL_CALENDAR_ID", { throw new IllegalStateException("Must have a calendar ID set")})
+
+  val events = service.events().list(calendarId)
+    // .setMaxResults(10)
     .setTimeMin(now)
     .setOrderBy("startTime")
     .setSingleEvents(true)
     .execute()
 
-  val items = events.getItems()
+  val batch = service.batch()
 
-  if (items.size() == 0) {
-    println("No upcoming events found.");
-  } else {
-    println("Upcoming events");
-    for (event <- items) {
-      val start = Option(event.getStart().getDateTime()).getOrElse(event.getStart().getDate())
-      println(s"${event.getSummary} ($start)")
-    }
+  for (
+    event <- events.getItems;
+    evtId = event.getId
+  ) {
+    service.events().delete(calendarId, evtId).queue(batch, deleteCallback)
   }
 
+  batch.execute()
 }
