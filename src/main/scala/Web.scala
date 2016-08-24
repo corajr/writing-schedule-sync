@@ -1,6 +1,7 @@
 import org.scalatest.selenium._
-import org.openqa.selenium.{WebDriver, WebElement, By}
+import org.openqa.selenium._
 import org.openqa.selenium.support.ui._
+import java.time.LocalDate
 import com.machinepublishers.jbrowserdriver.JBrowserDriver
 
 object Web extends WebBrowser {
@@ -21,13 +22,22 @@ object Web extends WebBrowser {
   }
 
   def extractCalendar(url: String): Seq[IcsEvent] = {
+    import scala.collection.JavaConversions._
     go to url
     waitFor(_.findElement(By.id("schedule")))
 
-    click on id("exportCalLink")
+    executeScript("""$(".el.el-th-list").click();""")
 
-    val calFile = new java.io.File("./download_cache/PacemakerWritingSchedule.ics")
+    val schedule = waitFor(_.findElement(By.xpath("""//div[@id="scheduleDisplay"]/table""")))
 
-    Seq()
+    val formatter = java.time.format.DateTimeFormatter.ofPattern("M/d/uuuu")
+
+    for {
+      element <- schedule.findElements(By.xpath("./tbody/tr[position() > 0]"))
+      dateString = element.findElement(By.xpath("./td[3]")).getText
+      wordcountString = element.findElement(By.xpath("./td[4]")).getText
+      date = LocalDate.parse(dateString, formatter)
+      wordCount = wordcountString.filter(_.isDigit).toInt
+    } yield IcsEvent(date, wordCount)
   }
 }
