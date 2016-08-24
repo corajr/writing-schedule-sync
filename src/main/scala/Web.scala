@@ -32,12 +32,15 @@ object Web extends WebBrowser {
 
     val formatter = java.time.format.DateTimeFormatter.ofPattern("M/d/uuuu")
 
-    for {
+    val events = for {
       element <- schedule.findElements(By.xpath("./tbody/tr[position() > 0]"))
       dateString = element.findElement(By.xpath("./td[3]")).getText
       wordcountString = element.findElement(By.xpath("./td[4]")).getText
       date = LocalDate.parse(dateString, formatter)
       wordCount = wordcountString.filter(_.isDigit).toInt
     } yield IcsEvent(date, wordCount)
+
+    quit()
+    events
   }
 }

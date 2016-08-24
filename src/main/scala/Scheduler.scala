@@ -74,14 +74,13 @@ object Scheduler extends App {
   }
 
   args match {
-    case Array(fname) =>
-      val file = new java.io.File(fname)
-      val events = Events.fromFileToGcal(file)
+    case Array(url) =>
+      val events = Web.extractCalendar(url)
       if (events.nonEmpty) {
         deleteExistingEvents()
-        addEvents(events)
+        addEvents(Events.toGcal(events))
       }
-    case _ => println("Needs an ICS filename.")
+    case _ => println("Needs a pacemaker.press plan URL")
   }
 
 }
