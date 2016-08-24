@@ -20,7 +20,7 @@ object Web extends WebBrowser {
     pageTitle
   }
 
-  def extractCalendar(url: String): Boolean = {
+  def extractCalendar(url: String): Seq[IcsEvent] = {
     go to url
     waitFor(_.findElement(By.id("schedule")))
 
@@ -28,6 +28,6 @@ object Web extends WebBrowser {
 
     val calFile = new java.io.File("./download_cache/PacemakerWritingSchedule.ics")
 
-    waitFor({_ => calFile.exists})
+    Seq()
   }
 }

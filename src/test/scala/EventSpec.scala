@@ -96,6 +96,8 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
         )
         val expectedEvents = dates.map { d => IcsEvent(d, 2000) }
 
+        events should have size (expectedEvents.size)
+
         forAll (events zip expectedEvents) { case (x, y) =>
           x should equal (y)
         }
