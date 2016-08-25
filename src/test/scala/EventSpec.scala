@@ -14,7 +14,7 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
     }
 
     describe("toGcal") {
-      implicit val pomoOpts = PomodoroOptions()
+      implicit val pomoOpts = PomodoroOptions(pacePerPomodoro = 125, startTime = LocalTime.of(13, 0))
 
       it("can be converted into a series of GcalEvents") {
         val dateTimes = IndexedSeq(
@@ -53,7 +53,7 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
   describe("PomodoroOptions") {
     it("has a pace and a start time") {
       val pomoOpts = PomodoroOptions()
-      pomoOpts.pacePerPomodoro should equal (125)
+      pomoOpts.pacePerPomodoro should equal (150)
       pomoOpts.startTime should equal (LocalTime.of(13,0))
     }
   }
@@ -62,7 +62,7 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
     describe("wordCountToTimeBlocks") {
       import Events.wordCountToTimeBlocks
       it("converts a word count to a list of pomodoro blocks with word counts") {
-        implicit val pomoOpts = PomodoroOptions(pacePerPomodoro = 100)
+        implicit val pomoOpts = PomodoroOptions(pacePerPomodoro = 100, startTime = LocalTime.of(13,0))
         wordCountToTimeBlocks(0) should equal (Seq())
         wordCountToTimeBlocks(50) should equal (Seq(TimeBlock(0, 1, 50)))
         wordCountToTimeBlocks(100) should equal (Seq(TimeBlock(0, 1, 100)))
@@ -107,6 +107,9 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
     describe("fromFileToGcal") {
       it("turns an input iCal into GcalEvents") {
         val ics = new java.io.File(getClass.getResource("/PacemakerWritingSchedule.ics").getFile)
+
+        implicit val pomoOpts = PomodoroOptions(pacePerPomodoro = 125, startTime = LocalTime.of(13,0))
+
         val events = Events.fromFileToGcal(ics)
         events should have size (30)
       }
