@@ -7,7 +7,7 @@ import com.machinepublishers.jbrowserdriver.JBrowserDriver
 object Web extends WebBrowser {
   implicit val webDriver: WebDriver = new JBrowserDriver
 
-  def waitFor[T](f: (WebDriver) => T, timeOut: Long = 5)(implicit driver: WebDriver): T = {
+  def waitFor[T](f: (WebDriver) => T, timeOut: Long = 10)(implicit driver: WebDriver): T = {
     new WebDriverWait(driver, timeOut).until(
       new ExpectedCondition[T] {
         override def apply(d: WebDriver) = f(d)

@@ -1,7 +1,7 @@
 import org.scalatest._
 import java.time.LocalDate
 
-// @Ignore
+@Ignore
 class WebSpec extends FunSpec with Matchers with Inspectors {
   describe("getTitle") {
     ignore("gets the title of a page") {

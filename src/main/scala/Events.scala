@@ -32,7 +32,7 @@ case class IcsEvent(date: java.time.LocalDate, wordCount: Int) {
 case class GcalEvent(start: DateTime, end: DateTime, summary: String)
 
 case class PomodoroOptions(
-  pacePerPomodoro: Int = 150,
+  pacePerPomodoro: Int = 125,
   startTime: LocalTime = LocalTime.of(13, 0)
 )
 
@@ -62,7 +62,7 @@ object Events {
     def wordCountToTimeBlocks0(n: Int, i: Int, count: Int): List[TimeBlock] = {
       if (i == 0) {
         List()
-      } else if (i < 3) {
+      } else if (i <= 3) {
         List(TimeBlock(n, n+i, count))
       } else {
         val wc = pomoOpts.pacePerPomodoro * 3

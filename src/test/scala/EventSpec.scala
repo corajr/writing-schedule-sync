@@ -52,7 +52,7 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
   }
   describe("PomodoroOptions") {
     it("has a pace and a start time") {
-      val pomoOpts = PomodoroOptions()
+      val pomoOpts = PomodoroOptions(pacePerPomodoro = 150, startTime = LocalTime.of(13,0))
       pomoOpts.pacePerPomodoro should equal (150)
       pomoOpts.startTime should equal (LocalTime.of(13,0))
     }
@@ -67,9 +67,11 @@ class EventSpec extends FunSpec with Matchers with Inspectors {
         wordCountToTimeBlocks(50) should equal (Seq(TimeBlock(0, 1, 50)))
         wordCountToTimeBlocks(100) should equal (Seq(TimeBlock(0, 1, 100)))
         wordCountToTimeBlocks(200) should equal (Seq(TimeBlock(0, 2, 200)))
+        wordCountToTimeBlocks(250) should equal (Seq(TimeBlock(0, 3, 250)))
         wordCountToTimeBlocks(300) should equal (Seq(TimeBlock(0, 3, 300)))
         wordCountToTimeBlocks(350) should equal (Seq(TimeBlock(0, 3, 300), TimeBlock(4, 5, 50)))
         wordCountToTimeBlocks(400) should equal (Seq(TimeBlock(0, 3, 300), TimeBlock(4, 5, 100)))
+        wordCountToTimeBlocks(550) should equal (Seq(TimeBlock(0, 3, 300), TimeBlock(4, 7, 250)))
         wordCountToTimeBlocks(600) should equal (Seq(TimeBlock(0, 3, 300), TimeBlock(4, 7, 300)))
         wordCountToTimeBlocks(700) should equal (Seq(TimeBlock(0, 3, 300), TimeBlock(4, 7, 300), TimeBlock(8, 9, 100)))
       }
