@@ -32,8 +32,8 @@ case class IcsEvent(date: java.time.LocalDate, wordCount: Int) {
 case class GcalEvent(start: DateTime, end: DateTime, summary: String)
 
 case class PomodoroOptions(
-  pacePerPomodoro: Int = 125,
-  startTime: LocalTime = LocalTime.of(13, 0)
+  pacePerPomodoro: Int = 150,
+  startTime: LocalTime = LocalTime.of(14, 0)
 )
 
 case class TimeBlock(startOffset: Int, endOffset: Int, wordCount: Int)

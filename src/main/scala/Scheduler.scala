@@ -44,16 +44,19 @@ object Scheduler extends App {
       .setSingleEvents(true)
       .execute()
 
-    val batch = service.batch()
+    val eventItems = events.getItems
+    if (eventItems.nonEmpty) {
+      val batch = service.batch()
 
-    for (
-      event <- events.getItems;
-      evtId = event.getId
-    ) {
-      service.events().delete(calendarId, evtId).queue(batch, deleteCallback)
+      for (
+        event <- eventItems;
+        evtId = event.getId
+      ) {
+        service.events().delete(calendarId, evtId).queue(batch, deleteCallback)
+      }
+
+      batch.execute()
     }
-
-    batch.execute()
   }
 
   def addEvents(events: Seq[GcalEvent]): Unit = {
