@@ -4,6 +4,7 @@ import com.google.api.client.util.DateTime
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback
 import com.google.api.client.googleapis.json.GoogleJsonError
 import com.google.api.client.http.HttpHeaders
+import scala.util.{Try, Success, Failure}
 
 object Scheduler extends App {
   import scala.collection.JavaConversions.asScalaBuffer
@@ -77,6 +78,17 @@ object Scheduler extends App {
   }
 
   args match {
+    case Array(url, pace) =>
+      Try(pace.toInt).map { paceN =>
+        val events = Web.extractCalendar(url)
+        if (events.nonEmpty) {
+          deleteExistingEvents()
+          addEvents(Events.toGcal(events)(PomodoroOptions(pacePerPomodoro = paceN)))
+        }
+      } match {
+        case Success(_) => println("Finished")
+        case Failure(ex) => println(s"Problem with ${ex.getMessage}")
+      }
     case Array(url) =>
       val events = Web.extractCalendar(url)
       if (events.nonEmpty) {
